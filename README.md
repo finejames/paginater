@@ -1,20 +1,20 @@
-Paginater [![Build Status](https://travis-ci.org/Unknwon/paginater.svg?branch=master)](https://travis-ci.org/Unknwon/paginater)
+Paginator [![Build Status](https://travis-ci.org/finejian/paginator.svg?branch=master)](https://travis-ci.org/finejian/paginator)
 =========
 
-Package paginater is a helper module for custom pagination calculation.
+Package paginator is a helper module for custom pagination calculation.
 
 ## Installation
 
-	go get github.com/Unknwon/paginater
+	go get github.com/finejian/paginator
 
 ## Getting Started
 
-The following code shows an example of how to use paginater:
+The following code shows an example of how to use paginator:
 
 ```go
 package main
 
-import "github.com/Unknwon/paginater"
+import "github.com/finejian/paginator"
 
 func main() {
 	// Arguments:
@@ -22,7 +22,7 @@ func main() {
 	// - Number of rows in one page
 	// - Current page number 
 	// - Number of page links to be displayed
-	p := paginater.New(45, 10, 3, 3)
+	p := paginator.New(45, 10, 3, 3)
 	
 	// Then use p as a template object named "Page" in "demo.html"
 	// ...
@@ -57,8 +57,8 @@ As you may guess, if the `Page` value is `-1`, you should print `...` in the HTM
 
 ## Getting Help
 
-- [API Documentation](https://gowalker.org/github.com/Unknwon/paginater)
-- [File An Issue](https://github.com/Unknwon/paginater/issues/new)
+- [API Documentation](https://gowalker.org/github.com/finejian/paginator)
+- [File An Issue](https://github.com/finejian/paginator/issues/new)
 
 ## License
 

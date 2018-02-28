@@ -1,4 +1,4 @@
-// Copyright 2015 Unknwon
+// Copyright 2015 FineJian
 //
 // Licensed under the Apache License, Version 2.0 (the "License"): you may
 // not use this file except in compliance with the License. You may obtain
@@ -12,7 +12,7 @@
 // License for the specific language governing permissions and limitations
 // under the License.
 
-package paginater
+package paginator
 
 import (
 	"testing"
@@ -20,7 +20,7 @@ import (
 	. "github.com/smartystreets/goconvey/convey"
 )
 
-func Test_Paginater(t *testing.T) {
+func Test_Paginator(t *testing.T) {
 	Convey("Basic logics", t, func() {
 		p := New(0, -1, -1, 0)
 		So(p.PagingNum(), ShouldEqual, 1)

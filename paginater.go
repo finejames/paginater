@@ -1,4 +1,4 @@
-// Copyright 2015 Unknwon
+// Copyright 2015 FineJian
 //
 // Licensed under the Apache License, Version 2.0 (the "License"): you may
 // not use this file except in compliance with the License. You may obtain
@@ -12,26 +12,26 @@
 // License for the specific language governing permissions and limitations
 // under the License.
 
-// Package paginater is a helper module for custom pagination calculation.
-package paginater
+// Package paginator is a helper module for custom pagination calculation.
+package paginator
 
-// Paginater represents a set of results of pagination calculations.
-type Paginater struct {
+// Paginator represents a set of results of pagination calculations.
+type Paginator struct {
 	total     int
 	pagingNum int
 	current   int
 	numPages  int
 }
 
-// New initialize a new pagination calculation and returns a Paginater as result.
-func New(total, pagingNum, current, numPages int) *Paginater {
+// New initialize a new pagination calculation and returns a Paginator as result.
+func New(total, pagingNum, current, numPages int) *Paginator {
 	if pagingNum <= 0 {
 		pagingNum = 1
 	}
 	if current <= 0 {
 		current = 1
 	}
-	p := &Paginater{total, pagingNum, current, numPages}
+	p := &Paginator{total, pagingNum, current, numPages}
 	if p.current > p.TotalPages() {
 		p.current = p.TotalPages()
 	}
@@ -39,16 +39,16 @@ func New(total, pagingNum, current, numPages int) *Paginater {
 }
 
 // IsFirst returns true if current page is the first page.
-func (p *Paginater) IsFirst() bool {
+func (p *Paginator) IsFirst() bool {
 	return p.current == 1
 }
 
 // HasPrevious returns true if there is a previous page relative to current page.
-func (p *Paginater) HasPrevious() bool {
+func (p *Paginator) HasPrevious() bool {
 	return p.current > 1
 }
 
-func (p *Paginater) Previous() int {
+func (p *Paginator) Previous() int {
 	if !p.HasPrevious() {
 		return p.current
 	}
@@ -56,11 +56,11 @@ func (p *Paginater) Previous() int {
 }
 
 // HasNext returns true if there is a next page relative to current page.
-func (p *Paginater) HasNext() bool {
+func (p *Paginator) HasNext() bool {
 	return p.total > p.current*p.pagingNum
 }
 
-func (p *Paginater) Next() int {
+func (p *Paginator) Next() int {
 	if !p.HasNext() {
 		return p.current
 	}
@@ -68,7 +68,7 @@ func (p *Paginater) Next() int {
 }
 
 // IsLast returns true if current page is the last page.
-func (p *Paginater) IsLast() bool {
+func (p *Paginator) IsLast() bool {
 	if p.total == 0 {
 		return true
 	}
@@ -76,12 +76,12 @@ func (p *Paginater) IsLast() bool {
 }
 
 // Total returns number of total rows.
-func (p *Paginater) Total() int {
+func (p *Paginator) Total() int {
 	return p.total
 }
 
 // TotalPage returns number of total pages.
-func (p *Paginater) TotalPages() int {
+func (p *Paginator) TotalPages() int {
 	if p.total == 0 {
 		return 1
 	}
@@ -92,16 +92,16 @@ func (p *Paginater) TotalPages() int {
 }
 
 // Current returns current page number.
-func (p *Paginater) Current() int {
+func (p *Paginator) Current() int {
 	return p.current
 }
 
 // PagingNum returns number of page size.
-func (p *Paginater) PagingNum() int {
+func (p *Paginator) PagingNum() int {
 	return p.pagingNum
 }
 
-// Page presents a page in the paginater.
+// Page presents a page in the paginator.
 type Page struct {
 	num       int
 	isCurrent bool
@@ -124,7 +124,7 @@ func getMiddleIdx(numPages int) int {
 
 // Pages returns a list of nearby page numbers relative to current page.
 // If value is -1 means "..." that more pages are not showing.
-func (p *Paginater) Pages() []*Page {
+func (p *Paginator) Pages() []*Page {
 	if p.numPages == 0 {
 		return []*Page{}
 	} else if p.numPages == 1 && p.TotalPages() == 1 {

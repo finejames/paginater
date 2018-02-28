@@ -22,5 +22,5 @@ _testmain.go
 *.exe
 *.test
 *.prof
-paginater.sublime-project
-paginater.sublime-workspace
+paginator.sublime-project
+paginator.sublime-workspace
