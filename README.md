@@ -1,15 +1,15 @@
 Paginator [![Build Status](https://travis-ci.org/finejian/paginator.svg?branch=master)](https://travis-ci.org/finejian/paginator)
 =========
 
-Package paginator is a helper module for custom pagination calculation.
+Paginator是一个Golang分页工具，在原作者的基础上支持获取指定页码URL，和生成分页HTML整段代码功能。
 
-## Installation
+## 安装
 
 	go get github.com/finejian/paginator
 
-## Getting Started
+## 开始使用
 
-The following code shows an example of how to use paginator:
+简易模式，获取分页页码:
 
 ```go
 package main
