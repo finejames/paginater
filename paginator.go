@@ -172,7 +172,7 @@ func (p *Paginator) Pages() []*Page {
 	previousCount, nextCount := linkedRadius, linkedRadius
 	// 如果 linkedCount 是偶数， current 前面页数比后面多1
 	if p.linkedCount%2 == 0 {
-		previousCount++
+		nextCount--
 	}
 
 	// 如果 current<=previousCount 那么需要的页面就是从1到 linkedCount
@@ -192,8 +192,8 @@ func (p *Paginator) Pages() []*Page {
 		maxIdx = p.current + nextCount
 	}
 
-	for i := offsetIdx; i < maxIdx; i++ {
-		pages[i-1] = &Page{i, i == p.current}
+	for i := 0; i < maxIdx - offsetIdx + 1; i++ {
+		pages[i] = &Page{offsetIdx + i, offsetIdx + i == p.current}
 	}
 	return pages
 }
