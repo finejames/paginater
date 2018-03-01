@@ -14,6 +14,13 @@
 
 package paginator
 
+import (
+	"fmt"
+	"net/http"
+	"strconv"
+	"strings"
+)
+
 // Paginator 是分页程序计算的结果
 type Paginator struct {
 	total int // 总条数
@@ -21,6 +28,11 @@ type Paginator struct {
 	pageSize    int // 每页条数
 	current     int // 当前页页码
 	linkedCount int // 可以链接到的页面数量
+
+	pageKey string            // http 请求的 query 页码关键字
+	request *http.Request     // 网络请求
+	url     string            // http 请求的 url
+	params  map[string]string // http 请求的 query 参数集合，不包含 pageKey
 }
 
 // Config 默认配置
@@ -28,12 +40,17 @@ type Config struct {
 	PageSize    int // 每页条数
 	Current     int // 当前页页码
 	LinkedCount int // 可以链接到的页面数量
+
+	PageKey string        // http query 请求的页码关键字
+	Request *http.Request // 网络请求
 }
 
 const (
 	defaultPageSize    = 10
 	defaultCurrent     = 1
 	defaultLinkedCount = 3
+
+	defaultPageKey = "page"
 )
 
 // Custom 定制默认参数
@@ -41,9 +58,22 @@ func Custom(c *Config, total int) *Paginator {
 	if c.PageSize <= 0 {
 		c.PageSize = defaultPageSize
 	}
-	p := &Paginator{total, c.PageSize, c.Current, c.LinkedCount}
+	p := &Paginator{
+		total:       total,
+		pageSize:    c.PageSize,
+		current:     c.Current,
+		linkedCount: c.LinkedCount,
+
+		pageKey: c.PageKey,
+		request: nil,
+		url:     "",
+		params:  map[string]string{},
+	}
 	if p.current > p.TotalPages() {
 		p.current = p.TotalPages()
+	}
+	if len(p.pageKey) == 0 {
+		p.pageKey = defaultPageKey
 	}
 	return p
 }
@@ -54,13 +84,59 @@ func New(total int) *Paginator {
 		PageSize:    defaultPageSize,
 		Current:     defaultCurrent,
 		LinkedCount: defaultLinkedCount,
+		PageKey:     defaultPageKey,
 	}
 	return Custom(c, total)
+}
+
+// Request 初始化网络请求参数后才可以调用获取指定 page url 等接口
+// 如果接口传入了 pageKey query 参数，会根据参数内容更新 current 页码
+func (p *Paginator) Request(r *http.Request) *Paginator {
+	if r == nil {
+		return p
+	}
+	current := 0
+	params := map[string]string{}
+	rawQuerys := strings.Split(r.URL.RawQuery, "&")
+
+	for _, query := range rawQuerys {
+		param := strings.Split(query, "=")
+		if strings.EqualFold(param[0], p.pageKey) {
+			current, _ = strconv.Atoi(param[1])
+		} else {
+			params[param[0]] = param[1]
+		}
+	}
+
+	p.url = r.URL.Path
+	p.params = params
+	if current != 0 {
+		p.current = current
+	}
+	return p
 }
 
 // IsFirst 如果当前页是第一页返回true
 func (p *Paginator) IsFirst() bool {
 	return p.current == 1
+}
+
+func (p *Paginator) path(pageNum int) string {
+	// url 为空认为是没有初始化过 request 方法，不做处理，直接返回
+	if len(p.url) == 0 {
+		return ""
+	}
+	params := fmt.Sprintf("%s?", p.url)
+	for key, value := range p.params {
+		params = fmt.Sprintf("%s%s=%s&", params, key, value)
+	}
+	params = fmt.Sprintf("%s%s=%d", params, p.pageKey, pageNum)
+	return params
+}
+
+// FristURL 返回第一页 url
+func (p *Paginator) FristURL() string {
+	return p.path(1)
 }
 
 // HasPrevious 如果当前页存在前一页则返回true
@@ -76,6 +152,11 @@ func (p *Paginator) Previous() int {
 	return p.current - 1
 }
 
+// PreviousURL 返回前一页 url
+func (p *Paginator) PreviousURL() string {
+	return p.path(p.Previous())
+}
+
 // HasNext 如果当前页存在后一页则返回true
 func (p *Paginator) HasNext() bool {
 	return p.total > p.current*p.pageSize
@@ -87,6 +168,11 @@ func (p *Paginator) Next() int {
 		return p.current
 	}
 	return p.current + 1
+}
+
+// NextURL 返回下一页 url
+func (p *Paginator) NextURL() string {
+	return p.path(p.Next())
 }
 
 // IsLast 如果当前页是最后一页返回true
@@ -113,9 +199,19 @@ func (p *Paginator) TotalPages() int {
 	return p.total/p.pageSize + 1
 }
 
+// LastURL 返回最后一页 url
+func (p *Paginator) LastURL() string {
+	return p.path(p.TotalPages())
+}
+
 // Current 返回当前页页码
 func (p *Paginator) Current() int {
 	return p.current
+}
+
+// CurrentURL 返回当前页 url
+func (p *Paginator) CurrentURL() string {
+	return p.path(p.Current())
 }
 
 // PageSize 返回每页条数
@@ -192,8 +288,8 @@ func (p *Paginator) Pages() []*Page {
 		maxIdx = p.current + nextCount
 	}
 
-	for i := 0; i < maxIdx - offsetIdx + 1; i++ {
-		pages[i] = &Page{offsetIdx + i, offsetIdx + i == p.current}
+	for i := 0; i < maxIdx-offsetIdx+1; i++ {
+		pages[i] = &Page{offsetIdx + i, offsetIdx+i == p.current}
 	}
 	return pages
 }
