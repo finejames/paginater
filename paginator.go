@@ -51,6 +51,15 @@ const (
 	defaultLinkedCount = 3
 
 	defaultPageKey = "page"
+
+	tempBegin        = `<ul>`
+	tempLinkFirst    = `<li><a href="%s">首页</a></li>`
+	tempLinkPrevious = `<li><a href="%s">上一页</a></li>`
+	tempLinkPage     = `<li><a href="%s">%d</a></li>`
+	tempLinkCurrent  = `<li class="active"><a href="%s">%d</a></li>`
+	tempLinkNext     = `<li><a href="%s">下一页</a></li>`
+	tempLinkLast     = `<li><a href="%s">尾页</a></li>`
+	tempEnd          = `</ul>`
 )
 
 // Custom 定制默认参数
@@ -340,4 +349,34 @@ func (p *PageURL) Path() string {
 		params = fmt.Sprintf("%s%s=%s&", params, key, value)
 	}
 	return fmt.Sprintf("%s%s=%d", params, p.pageKey, p.num)
+}
+
+// PageTemp 获取分页结果的网页模版，可直接在 html 中加载
+func (p *Paginator) PageTemp() string {
+	paths := p.PageURLs()
+	if len(paths) == 0 {
+		return ""
+	}
+	if len(paths) == 1 {
+		middle := fmt.Sprintf(tempLinkCurrent, paths[0].Path(), paths[0].Num())
+		return fmt.Sprintf("%s\n%s\n%s", tempBegin, middle, tempEnd)
+	}
+
+	middle := ""
+	for _, path := range paths {
+		if path.IsCurrent() {
+			middle += fmt.Sprintf(tempLinkCurrent, path.Path(), path.Num())
+		} else {
+			middle += fmt.Sprintf(tempLinkPage, path.Path(), path.Num())
+		}
+	}
+
+	return fmt.Sprintf("%s\n%s\n%s\n%s\n%s\n%s\n%s\n",
+		tempBegin,
+		fmt.Sprintf(tempLinkFirst, p.FristURL()),
+		fmt.Sprintf(tempLinkPrevious, p.PreviousURL()),
+		middle,
+		fmt.Sprintf(tempLinkNext, p.NextURL()),
+		fmt.Sprintf(tempLinkLast, p.LastURL()),
+		tempEnd)
 }
