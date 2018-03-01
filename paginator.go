@@ -130,8 +130,7 @@ func (p *Paginator) path(pageNum int) string {
 	for key, value := range p.params {
 		params = fmt.Sprintf("%s%s=%s&", params, key, value)
 	}
-	params = fmt.Sprintf("%s%s=%d", params, p.pageKey, pageNum)
-	return params
+	return fmt.Sprintf("%s%s=%d", params, p.pageKey, pageNum)
 }
 
 // FristURL 返回第一页 url
@@ -292,4 +291,53 @@ func (p *Paginator) Pages() []*Page {
 		pages[i] = &Page{offsetIdx + i, offsetIdx+i == p.current}
 	}
 	return pages
+}
+
+// PageURLs 返回当前页临近几页的页码和 URL 信息
+func (p *Paginator) PageURLs() []*PageURL {
+	pages := p.Pages()
+	pageURLs := make([]*PageURL, len(pages))
+	for i := 0; i < len(pages); i++ {
+		pageURLs[i] = &PageURL{
+			Page:    pages[i],
+			pageKey: p.pageKey,
+			request: p.request,
+			url:     p.url,
+			params:  p.params,
+		}
+	}
+	return pageURLs
+}
+
+// PageURL 当前页的数据内容
+type PageURL struct {
+	*Page
+
+	pageKey string            // http 请求的 query 页码关键字
+	request *http.Request     // 网络请求
+	url     string            // http 请求的 url
+	params  map[string]string // http 请求的 query 参数集合，不包含 pageKey
+}
+
+// Num 页码
+func (p *PageURL) Num() int {
+	return p.num
+}
+
+// IsCurrent 是否是当前页
+func (p *PageURL) IsCurrent() bool {
+	return p.isCurrent
+}
+
+// Path 当前网页路径地址
+func (p *PageURL) Path() string {
+	// url 为空认为是没有初始化过 request 方法，不做处理，直接返回
+	if len(p.url) == 0 {
+		return ""
+	}
+	params := fmt.Sprintf("%s?", p.url)
+	for key, value := range p.params {
+		params = fmt.Sprintf("%s%s=%s&", params, key, value)
+	}
+	return fmt.Sprintf("%s%s=%d", params, p.pageKey, p.num)
 }

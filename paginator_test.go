@@ -113,5 +113,9 @@ func Test_Paginator(t *testing.T) {
 		for _, page := range p.Pages() {
 			Printf("%v %s \n", page, p.path(page.num))
 		}
+
+		for _, page := range p.PageURLs() {
+			Printf("%d %v %s \n", page.Num(), page.IsCurrent(), page.Path())
+		}
 	})
 }
