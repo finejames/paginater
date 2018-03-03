@@ -16,6 +16,7 @@ package paginator
 
 import (
 	"fmt"
+	"html/template"
 	"net/http"
 	"strconv"
 	"strings"
@@ -131,10 +132,6 @@ func (p *Paginator) IsFirst() bool {
 }
 
 func (p *Paginator) path(pageNum int) string {
-	// url 为空认为是没有初始化过 request 方法，不做处理，直接返回
-	if len(p.url) == 0 {
-		return ""
-	}
 	params := fmt.Sprintf("%s?", p.url)
 	for key, value := range p.params {
 		params = fmt.Sprintf("%s%s=%s&", params, key, value)
@@ -340,10 +337,6 @@ func (p *PageURL) IsCurrent() bool {
 
 // Path 当前网页路径地址
 func (p *PageURL) Path() string {
-	// url 为空认为是没有初始化过 request 方法，不做处理，直接返回
-	if len(p.url) == 0 {
-		return ""
-	}
 	params := fmt.Sprintf("%s?", p.url)
 	for key, value := range p.params {
 		params = fmt.Sprintf("%s%s=%s&", params, key, value)
@@ -352,14 +345,14 @@ func (p *PageURL) Path() string {
 }
 
 // PageTemp 获取分页结果的网页模版，可直接在 html 中加载
-func (p *Paginator) PageTemp() string {
+func (p *Paginator) PageTemp() template.HTML {
 	paths := p.PageURLs()
 	if len(paths) == 0 {
 		return ""
 	}
 	if len(paths) == 1 {
 		middle := fmt.Sprintf(tempLinkCurrent, paths[0].Path(), paths[0].Num())
-		return fmt.Sprintf("%s\n%s\n%s", tempBegin, middle, tempEnd)
+		return template.HTML(fmt.Sprintf("%s\n%s\n%s", tempBegin, middle, tempEnd))
 	}
 
 	middle := ""
@@ -371,12 +364,12 @@ func (p *Paginator) PageTemp() string {
 		}
 	}
 
-	return fmt.Sprintf("%s\n%s\n%s\n%s\n%s\n%s\n%s\n",
+	return template.HTML(fmt.Sprintf("%s\n%s\n%s\n%s\n%s\n%s\n%s\n",
 		tempBegin,
 		fmt.Sprintf(tempLinkFirst, p.FristURL()),
 		fmt.Sprintf(tempLinkPrevious, p.PreviousURL()),
 		middle,
 		fmt.Sprintf(tempLinkNext, p.NextURL()),
 		fmt.Sprintf(tempLinkLast, p.LastURL()),
-		tempEnd)
+		tempEnd))
 }
