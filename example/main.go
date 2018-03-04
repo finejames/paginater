@@ -15,7 +15,7 @@ func main() {
 		p.Request(c.Request)
 
 		c.HTML(http.StatusOK, "example.html", gin.H{
-			"paginator": p,
+			"page": p,
 		})
 	})
 	router.Run(":8080")

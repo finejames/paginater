@@ -1,1 +1,22 @@
-{{.paginator.PageTemp}}
+﻿{{.page.PageTemp}}
+
+<br/>
+<br/>
+<br/>
+<br/>
+
+
+
+{{if not .page.IsFirst}}<a href="{{.page.FristURL}}">首页</a>{{end}}
+{{if .page.HasPrevious}}<a href="{{.page.PreviousURL}}">上一页</a>{{end}}
+
+{{range .page.PageURLs}}
+	{{if eq .Num -1}}
+	...
+	{{else}}
+	<a href="{{.Path}}">{{.Num}}{{if .IsCurrent}}(current){{end}}</a>
+	{{end}}
+{{end}}
+
+{{if .page.HasNext}}<a href="{{.page.NextURL}}">下一页</a>{{end}}
+{{if not .page.IsLast}}<a href="{{.page.LastURL}}">尾页</a>{{end}}
